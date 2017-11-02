@@ -1,6 +1,7 @@
 {
     "name": "javidalpe/laravel-localization-automation",
     "description": "Translate your Laravel localization files using third party services",
+    "keywords": ["laravel", "localization"],
     "type": "library",
     "require": {
         "illuminate/support": "^5.5"
@@ -12,5 +13,15 @@
             "email": "jvpenya@gmail.com"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": { "Javidalpe\\LaravelLocalizationAutomation\\": "src" }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Javidalpe\\LaravelLocalizationAutomation\\LaravelLocalizationAutomationServiceProvider"
+            ]
+        }
+    }
 }
