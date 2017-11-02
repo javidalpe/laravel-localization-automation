@@ -3,6 +3,7 @@
 namespace Javidalpe\LaravelLocalizationAutomation;
 
 use Illuminate\Support\ServiceProvider;
+use Javidalpe\LaravelLocalizationAutomation\Commands\AutoTranslateCommand;
 
 class LaravelLocalizationAutomationServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,11 @@ class LaravelLocalizationAutomationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                AutoTranslateCommand::class,
+            ]);
+        }
     }
 
     /**
