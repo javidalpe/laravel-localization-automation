@@ -1,0 +1,16 @@
+{
+    "name": "javidalpe/laravel-localization-automation",
+    "description": "Translate your Laravel localization files using third party services",
+    "type": "library",
+    "require": {
+        "illuminate/support": "^5.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Javier Vidal Peña",
+            "email": "jvpenya@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
