@@ -7,12 +7,13 @@ use Illuminate\Console\Command;
 
 class AutoTranslateCommand extends Command
 {
-    /**
+	const VARIABLE_REGEX = '/(:\w+)/';
+	/**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'translate:generate';
+    protected $signature = 'translate:generate {from} {to}';
 
     /**
      * The console command description.
@@ -40,11 +41,13 @@ class AutoTranslateCommand extends Command
      */
     public function handle()
     {
-        $files = $this->getLocaleFile('es');
+    	$from = $this->argument('from');
+	    $to = $this->argument('to');
+        $files = $this->getLocaleFile($from);
         foreach ($files as $fileName => $dictionary) {
-            $this->translateDictionary($dictionary, $from = 'es', $to = 'it');
+            $this->translateDictionary($dictionary, $from, $to);
             $this->writeDictionary($fileName, $dictionary, $to);
-            echo "Fin {$fileName} -------------------";
+            echo "Fin {$fileName} -------------------\n";
         }
     }
 
@@ -101,6 +104,7 @@ class AutoTranslateCommand extends Command
         foreach ($dictionary as $key => $value) {
             if (is_array($value)) {
                 $this->translateDictionary($value, $from, $to);
+                $dictionary[$key] = $value;
             } else {
                 $this->translateLemma($dictionary, $value, $key, $from, $to);
             }
@@ -117,9 +121,14 @@ class AutoTranslateCommand extends Command
     private function getTranslated($value, $from, $to)
     {
         try {
-            $valueWithoutVariable = preg_replace('/:\w+/', 'X', $value);
-            $translatedText = $this->deeply->translate($valueWithoutVariable, strtoupper($to), strtoupper($from));
-            echo "[{$value} -> {$translatedText}]\n";
+	        preg_match_all(self::VARIABLE_REGEX, $value, $matches, PREG_SET_ORDER, 0);
+            if (count($matches) > 1) {
+	            $translatedText = $this->translateLemmaWithVariables($value, $from, $to, $matches);
+            } else {
+	            $translatedText = $this->deeply->translate($value, strtoupper($to), strtoupper($from));
+            }
+
+            echo "{$value} -> {$translatedText}\n";
             return $translatedText;
         } catch (\Exception $e) {
             echo $e->getMessage();
@@ -136,7 +145,7 @@ class AutoTranslateCommand extends Command
      */
     private function translateLemma(&$dictionary, $value, $key, $from, $to)
     {
-        if (str_contains("|", $value)) {
+        if (strpos($value, "|")) {
             $this->translateChoiceLemma($dictionary, $value, $key, $from, $to);
         } else {
             $lemma = $this->getTranslated($value, $from, $to);
@@ -151,7 +160,7 @@ class AutoTranslateCommand extends Command
      * @param $from
      * @param $to
      */
-    private function translateChoiceLemma($dictionary, $value, $key, $from, $to)
+    private function translateChoiceLemma(&$dictionary, $value, $key, $from, $to)
     {
         $lemmas = explode("|", $value);
         $lemmaSingular = $this->getTranslated($lemmas[0], $from, $to);
@@ -182,18 +191,11 @@ return %s;", $content);
     {
         $content = '';
         foreach ($dictionary as $key => $value) {
-            if (is_array($value)) {
-                $value = $this->arrayEncode($value, $int + 1);
-            } else {
-                $value = "\"{$value}\"";
-            }
-            $pad = str_repeat("\t", $int * 2);
-            $line = sprintf("%s'%s' => %s,\n", $pad, $key, $value);;
+	        $line = $this->valueEncode($int, $value, $key);
             $content = $content . $line;
         }
         return sprintf("array(
-%s
-)", $content);
+%s)", $content);
     }
 
     private function createLangDirectoryIfNotExists($to)
@@ -216,4 +218,49 @@ return %s;", $content);
         $fullPath = $langDirectory . '/' . $fileName;
         file_put_contents($fullPath, $content);
     }
+
+	/**
+	 * @param $int
+	 * @param $value
+	 * @param $key
+	 *
+	 * @return string
+	 */
+	private function valueEncode($int, $value, $key)
+	{
+		if (is_array($value)) {
+			$value = $this->arrayEncode($value, $int + 1);
+		} else {
+			$value = "\"{$value}\"";
+		}
+		$pad = str_repeat("\t", $int);
+		$line = sprintf("%s'%s' => %s,\n", $pad, $key, $value);
+
+		return $line;
+	}
+
+	/**
+	 * @param $value
+	 * @param $from
+	 * @param $to
+	 * @param $matches
+	 *
+	 * @return mixed
+	 */
+	private function translateLemmaWithVariables($value, $from, $to, $matches)
+	{
+		$replaces = [];
+		$replaced = $value;
+		foreach ($matches as $index => $match) {
+			$replace = 'X' . ($index + 1);
+			$replaced = str_replace($match[0], $replace, $replaced);
+			$replaces[$replace] = $match[0];
+		}
+		$translatedText = $this->deeply->translate($replaced, strtoupper($to), strtoupper($from));
+		foreach ($replaces as $replace => $match) {
+			$translatedText = str_replace($replace, $match, $translatedText);
+		}
+
+		return $translatedText;
+	}
 }
