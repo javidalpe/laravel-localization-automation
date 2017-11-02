@@ -3,8 +3,11 @@
     "description": "Translate your Laravel localization files using third party services",
     "keywords": ["laravel", "localization"],
     "type": "library",
+    "version": "0.0.0",
     "require": {
-        "illuminate/support": "^5.5"
+        "illuminate/support": "^5.5",
+        "chriskonnertz/deeply": "^1.5",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "license": "MIT",
     "authors": [
@@ -13,7 +16,6 @@
             "email": "jvpenya@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
     "autoload": {
         "psr-4": { "Javidalpe\\LaravelLocalizationAutomation\\": "src" }
     },
