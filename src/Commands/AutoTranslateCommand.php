@@ -277,13 +277,15 @@ return %s;", $content);
 	/**
 	 * @param $from
 	 * @param $to
-	 * @param $replaced
+	 * @param $value
 	 *
 	 * @return mixed
 	 */
-	private function trans($from, $to, $replaced)
+	private function trans($from, $to, $value)
 	{
-		$translatedText = $this->translatorService->translate($replaced, $from, $to);
+		if (empty($value)) return $value;
+
+		$translatedText = $this->translatorService->translate($value, $from, $to);
 
 		return $translatedText;
 	}
