@@ -17,7 +17,7 @@ Next up the service provider must be registered:
 ```
 
 ## Usage 
-This command translates all your files in `/lang/{from}/` directories and create new ones in `/lang/{to}/` directory 
+This command translates all your files in `/lang/{from}/` directories and create new ones in `/lang/{to}/` directory. 
 ```
 php artisan localization:translate {from} {to} {--provider=deepl}
 ```
@@ -38,7 +38,6 @@ DeepL(y) supports these languages:
 
 | Code | Language      |
 |------|---------------|
-| auto | _Auto detect_ |
 | DE   | German        |
 | EN   | English       |
 | FR   | French        |
@@ -51,15 +50,15 @@ DeepL(y) supports these languages:
 DeepL says they will [add more languages](https://www.heise.de/newsticker/meldung/Maschinelles-Uebersetzen-Deutsches-Start-up-DeepL-will-230-Sprachkombinationen-unterstuetzen-3836533.html) 
 in the future, such as Chinese and Russian.
 
-###Tips
+### Tips
 - Avoid using HTML tags inside your lemmas.
 
-##How it works
+## How it works
 1. Foreach file in `/lang/{from}/` directory.
 2. Foreach lemma in file.
 3. Split pluralization lemmas.
 4. Replace each place-holder with temp string.
-5. Translate the lemma.
+5. Translate the lemma using the provider.
 6. Undo replacement.
 7. Assembly all lemmas in new files at `/lang/{to}/` directory.
 
