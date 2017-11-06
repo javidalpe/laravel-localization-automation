@@ -134,7 +134,7 @@ class AutoTranslateCommand extends Command
         if (count($matches) > 0) {
             $translatedText = $this->translateLemmaWithVariables($value, $from, $to, $matches);
         } else {
-            $translatedText = $this->translatorService->translate($value, strtoupper($to), strtoupper($from));
+            $translatedText = $this->translatorService->translate($value, $from, $to);
         }
 
         return $translatedText;
@@ -260,7 +260,7 @@ return %s;", $content);
 			$replaced = str_replace($match[0], $replace, $replaced);
 			$replaces[$replace] = $match[0];
 		}
-		$translatedText = $this->translatorService->translate($replaced, strtoupper($to), strtoupper($from));
+		$translatedText = $this->translatorService->translate($replaced, $from, $to);
 		foreach ($replaces as $replace => $match) {
 			$translatedText = str_replace($replace, $match, $translatedText);
 		}
