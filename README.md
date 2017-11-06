@@ -4,11 +4,10 @@ This package translates your Laravel localization files using a third party serv
 ## Installation
 You can install the package via composer:
 ```
-composer requiere-dev javidalpe/laravel-localization-automation
+composer requiere --dev javidalpe/laravel-localization-automation
 ```  
 
-(Laravel 4 only)
-Next up the service provider must be registered:
+If you're on Laravel 5.4 or earlier, you'll need to add the following to your config/app.php:
 ```php
 'providers' => [
     ...
@@ -17,21 +16,31 @@ Next up the service provider must be registered:
 ```
 
 ## Usage 
-This command translates all your files in `/lang/{from}/` directories and create new ones in `/lang/{to}/` directory. 
+This command translates all your files in `/lang/{from}/` directory and create the new ones in `/lang/{to}/` directory. 
 ```
 php artisan localization:translate {from} {to} {--provider=deepl}
 ```
 
-Example using default provider:
+**Example using default provider:**
 ```
 php artisan localization:translate es fr
 ```
 
-Example using custom provider:
+**Example using custom provider:**
 ```
 php artisan localization:translate es fr --provider=deepl
 ```
 
+### Tips
+Avoid using HTML tags inside your lemmas.
+Wrong
+```php
+'welcome.greetings' => '<strong>Hey!</strong>',
+```
+Good
+```php
+'welcome.greetings' => 'Hey!',
+```
 ## Supported Languages
 ### Deeply
 DeepL(y) supports these languages:
@@ -50,9 +59,6 @@ DeepL(y) supports these languages:
 DeepL says they will [add more languages](https://www.heise.de/newsticker/meldung/Maschinelles-Uebersetzen-Deutsches-Start-up-DeepL-will-230-Sprachkombinationen-unterstuetzen-3836533.html) 
 in the future, such as Chinese and Russian.
 
-### Tips
-- Avoid using HTML tags inside your lemmas.
-
 ## How it works
 1. Foreach file in `/lang/{from}/` directory.
 2. Foreach lemma in file.
@@ -68,6 +74,11 @@ in the future, such as Chinese and Russian.
 3. Commit your changes (git commit -am 'Added translation service')
 4. Push to the branch (git push origin my-new-translation-service)
 5. Create new Pull Request
+
+### Add a new translation service
+1. Create a new class inside `/src/TranslationServices`. Implements `TranslationServiceStrategy`.
+2. Add this class to `TranslationServiceStrategyFactory`.
+3. Update this `README.md file.
 
 ## Credits
 - DeepL GmbH: https://www.deepl.com/
