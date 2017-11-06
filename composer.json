@@ -19,9 +19,6 @@
         "psr-4": { "Javidalpe\\LaravelLocalizationAutomation\\": "src" }
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        },
         "laravel": {
             "providers": [
                 "Javidalpe\\LaravelLocalizationAutomation\\LaravelLocalizationAutomationServiceProvider"
