@@ -2,8 +2,9 @@
 
 namespace Javidalpe\LaravelLocalizationAutomation\Commands;
 
-use ChrisKonnertz\DeepLy\DeepLy;
+use Guzzle\Service\Command\Factory\ServiceDescriptionFactory;
 use Illuminate\Console\Command;
+use Javidalpe\LaravelLocalizationAutomation\TranslationServices\TranslationServiceStrategyFactory;
 
 class AutoTranslateCommand extends Command
 {
@@ -13,7 +14,10 @@ class AutoTranslateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'translate:generate {from} {to}';
+    protected $signature = 'localization:translate 
+        {from : The original language to translate} 
+        {to : The destination language to translate} 
+        {--provider=' . TranslationServiceStrategyFactory::DEEPL .' : The third party service used to translate}';
 
     /**
      * The console command description.
@@ -22,16 +26,17 @@ class AutoTranslateCommand extends Command
      */
     protected $description = 'Uses a third party service to translate your localization files.';
 
-    private $deeply;
+    private $translatorService;
+    private $serviceStrategyFactory;
 
     /**
      * AutoTranslateCommand constructor.
-     * @param DeepLy $deeply
+     * @param TranslationServiceStrategyFactory $serviceStrategyFactory
      */
-    public function __construct(DeepLy $deeply)
+    public function __construct(TranslationServiceStrategyFactory $serviceStrategyFactory)
     {
         parent::__construct();
-        $this->deeply = $deeply;
+        $this->serviceStrategyFactory = $serviceStrategyFactory;
     }
 
     /**
@@ -41,14 +46,18 @@ class AutoTranslateCommand extends Command
      */
     public function handle()
     {
+        $this->setTranslatorService();
+
     	$from = $this->argument('from');
 	    $to = $this->argument('to');
+
         $files = $this->getLocaleFile($from);
+        $this->bar = $this->output->createProgressBar(count($files, COUNT_RECURSIVE));
         foreach ($files as $fileName => $dictionary) {
             $this->translateDictionary($dictionary, $from, $to);
             $this->writeDictionary($fileName, $dictionary, $to);
-            echo "Fin {$fileName} -------------------\n";
         }
+        $this->bar->finish();
     }
 
     /**
@@ -108,6 +117,7 @@ class AutoTranslateCommand extends Command
             } else {
                 $this->translateLemma($dictionary, $value, $key, $from, $to);
             }
+            $this->bar->advance();
         }
 
     }
@@ -120,20 +130,14 @@ class AutoTranslateCommand extends Command
      */
     private function getTranslated($value, $from, $to)
     {
-        try {
-	        preg_match_all(self::VARIABLE_REGEX, $value, $matches, PREG_SET_ORDER, 0);
-            if (count($matches) > 1) {
-	            $translatedText = $this->translateLemmaWithVariables($value, $from, $to, $matches);
-            } else {
-	            $translatedText = $this->deeply->translate($value, strtoupper($to), strtoupper($from));
-            }
-
-            echo "{$value} -> {$translatedText}\n";
-            return $translatedText;
-        } catch (\Exception $e) {
-            echo $e->getMessage();
+        preg_match_all(self::VARIABLE_REGEX, $value, $matches, PREG_SET_ORDER, 0);
+        if (count($matches) > 0) {
+            $translatedText = $this->translateLemmaWithVariables($value, $from, $to, $matches);
+        } else {
+            $translatedText = $this->translatorService->translate($value, strtoupper($to), strtoupper($from));
         }
-        return null;
+
+        return $translatedText;
     }
 
     /**
@@ -256,11 +260,17 @@ return %s;", $content);
 			$replaced = str_replace($match[0], $replace, $replaced);
 			$replaces[$replace] = $match[0];
 		}
-		$translatedText = $this->deeply->translate($replaced, strtoupper($to), strtoupper($from));
+		$translatedText = $this->translatorService->translate($replaced, strtoupper($to), strtoupper($from));
 		foreach ($replaces as $replace => $match) {
 			$translatedText = str_replace($replace, $match, $translatedText);
 		}
 
 		return $translatedText;
 	}
+
+    private function setTranslatorService()
+    {
+        $provider = $this->option('provider');
+        $this->translatorService = $this->serviceStrategyFactory->getStrategy($provider);
+    }
 }
