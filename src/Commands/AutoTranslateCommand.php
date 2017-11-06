@@ -134,7 +134,7 @@ class AutoTranslateCommand extends Command
         if (count($matches) > 0) {
             $translatedText = $this->translateLemmaWithVariables($value, $from, $to, $matches);
         } else {
-            $translatedText = $this->translatorService->translate($value, $from, $to);
+            $translatedText = $this->trans($from, $to, $value);
         }
 
         return $translatedText;
@@ -260,7 +260,7 @@ return %s;", $content);
 			$replaced = str_replace($match[0], $replace, $replaced);
 			$replaces[$replace] = $match[0];
 		}
-		$translatedText = $this->translatorService->translate($replaced, $from, $to);
+		$translatedText = $this->trans($from, $to, $replaced);
 		foreach ($replaces as $replace => $match) {
 			$translatedText = str_replace($replace, $match, $translatedText);
 		}
@@ -273,4 +273,18 @@ return %s;", $content);
         $provider = $this->option('provider');
         $this->translatorService = $this->serviceStrategyFactory->getStrategy($provider);
     }
+
+	/**
+	 * @param $from
+	 * @param $to
+	 * @param $replaced
+	 *
+	 * @return mixed
+	 */
+	private function trans($from, $to, $replaced)
+	{
+		$translatedText = $this->translatorService->translate($replaced, $from, $to);
+
+		return $translatedText;
+	}
 }
