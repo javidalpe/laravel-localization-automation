@@ -1,7 +1,7 @@
 {
     "name": "javidalpe/laravel-localization-automation",
     "description": "Translate your Laravel localization files using third party services",
-    "keywords": ["laravel", "localization"],
+    "keywords": ["laravel", "localization", "locales", "deepl", "lang"],
     "type": "library",
     "version": "0.0.0",
     "require": {

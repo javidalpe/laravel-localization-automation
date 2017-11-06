@@ -4,7 +4,7 @@ This package translates your Laravel localization files using a third party serv
 ## Installation
 You can install the package via composer:
 ```
-composer requiere --dev javidalpe/laravel-localization-automation
+composer require --dev javidalpe/laravel-localization-automation
 ```  
 
 If you're on Laravel 5.4 or earlier, you'll need to add the following to your config/app.php:
