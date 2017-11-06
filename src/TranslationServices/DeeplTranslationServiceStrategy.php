@@ -11,13 +11,12 @@ class DeeplTranslationServiceStrategy implements ITranslationServiceStrategy
 
     private $deeply;
 
-    /**
-     * AutoTranslateCommand constructor.
-     * @param DeepLy $deeply
-     */
-    public function __construct(DeepLy $deeply = null)
+	/**
+	 * DeeplTranslationServiceStrategy constructor.
+	 */
+    public function __construct()
     {
-        $this->deeply = $deeply;
+        $this->deeply = new DeepLy();
     }
 
     public function translate($lemma, $from, $to)
