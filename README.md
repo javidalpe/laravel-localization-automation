@@ -1,5 +1,7 @@
-# Translate your Laravel locale files
-This package translates your Laravel localization files using a third party service. Currently only supports [DeepL](https://www.deepl.com).
+# Automatically translate your lang files
+This package translates your Laravel localization files automatically using a third party service. Currently only supports [DeepL](https://www.deepl.com).
+
+> This package only works with 'Short Keys' approach
 
 ## Installation
 You can install the package via composer:
@@ -31,16 +33,22 @@ php artisan localization:translate es fr
 php artisan localization:translate es fr --provider=deepl
 ```
 
-### Tips
-Avoid using HTML tags inside your lemmas.
-Wrong
-```php
-'welcome.greetings' => '<strong>Hey!</strong>',
-```
-Good
-```php
-'welcome.greetings' => 'Hey!',
-```
+### Known issues
+The command will fail on:
+1. Lemmas with HTML inside.
+    ```php
+    \\Wrong
+    'welcome.greetings' => '<strong>Hey!</strong>',
+    \\Good
+    'welcome.greetings' => 'Hey!',
+    ```
+2. Lemmas with placeholders different from Laravel. 
+    ```php
+    \\Wrong
+    'welcome.greetings' => 'Hey {{name}}!',
+    \\Good
+    'welcome.greetings' => 'Hey!',
+ 3. URLs. Fix these URLs manually.
 ## Supported Languages
 ### Deeply
 DeepL(y) supports these languages:
@@ -63,7 +71,7 @@ in the future, such as Chinese and Russian.
 1. Foreach file in `/lang/{from}/` directory.
 2. Foreach lemma in file.
 3. Split pluralization lemmas.
-4. Replace each place-holder with temp string.
+4. Replace each Laravel place-holder with temp string.
 5. Translate the lemma using the provider.
 6. Undo replacement.
 7. Assembly all lemmas in new files at `/lang/{to}/` directory.

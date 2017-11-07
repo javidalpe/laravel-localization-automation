@@ -2,6 +2,7 @@
 
 namespace Javidalpe\LaravelLocalizationAutomation\Commands;
 
+use Exception;
 use Guzzle\Service\Command\Factory\ServiceDescriptionFactory;
 use Illuminate\Console\Command;
 use Javidalpe\LaravelLocalizationAutomation\TranslationServices\TranslationServiceStrategyFactory;
@@ -52,12 +53,15 @@ class AutoTranslateCommand extends Command
 	    $to = $this->argument('to');
 
         $files = $this->getLocaleFile($from);
-        $this->bar = $this->output->createProgressBar(count($files, COUNT_RECURSIVE));
+        $count = count($files, COUNT_RECURSIVE);
+        $this->bar = $this->output->createProgressBar($count);
+        $this->info(sprintf('%s lemmas found', $count));
         foreach ($files as $fileName => $dictionary) {
             $this->translateDictionary($dictionary, $from, $to);
             $this->writeDictionary($fileName, $dictionary, $to);
         }
         $this->bar->finish();
+        $this->info('Finished');
     }
 
     /**
@@ -198,8 +202,9 @@ return %s;", $content);
 	        $line = $this->valueEncode($int, $value, $key);
             $content = $content . $line;
         }
+        $pad = str_repeat("\t", $int);
         return sprintf("array(
-%s)", $content);
+%s%s)", $content, $pad);
     }
 
     private function createLangDirectoryIfNotExists($to)
@@ -235,7 +240,7 @@ return %s;", $content);
 		if (is_array($value)) {
 			$value = $this->arrayEncode($value, $int + 1);
 		} else {
-			$value = "\"{$value}\"";
+			$value = json_encode($value);
 		}
 		$pad = str_repeat("\t", $int);
 		$line = sprintf("%s'%s' => %s,\n", $pad, $key, $value);
@@ -285,8 +290,15 @@ return %s;", $content);
 	{
 		if (empty($value)) return $value;
 
-		$translatedText = $this->translatorService->translate($value, $from, $to);
+		$try = 3;
+		while ($try > 0) {
+            try {
+                $translatedText = $this->translatorService->translate($value, $from, $to);
+                return $translatedText;
+            } catch (Exception $e) {
+                $try--;
+            }
+        }
 
-		return $translatedText;
 	}
 }
