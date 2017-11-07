@@ -190,22 +190,11 @@ class AutoTranslateCommand extends Command
 
     private function getFileContent($dictionary)
     {
-        $content = $this->arrayEncode($dictionary, 1);
+        $content = var_export($dictionary, true);
         return sprintf("<?php
 return %s;", $content);
     }
 
-    private function arrayEncode($dictionary, $int)
-    {
-        $content = '';
-        foreach ($dictionary as $key => $value) {
-	        $line = $this->valueEncode($int + 1, $value, $key);
-            $content = $content . $line;
-        }
-        $pad = str_repeat("\t", $int);
-        return sprintf("array(
-%s%s)", $content, $pad);
-    }
 
     private function createLangDirectoryIfNotExists($to)
     {
@@ -227,26 +216,6 @@ return %s;", $content);
         $fullPath = $langDirectory . '/' . $fileName;
         file_put_contents($fullPath, $content);
     }
-
-	/**
-	 * @param $int
-	 * @param $value
-	 * @param $key
-	 *
-	 * @return string
-	 */
-	private function valueEncode($int, $value, $key)
-	{
-		if (is_array($value)) {
-			$value = $this->arrayEncode($value, $int);
-		} else {
-			$value = json_encode($value);
-		}
-		$pad = str_repeat("\t", $int);
-		$line = sprintf("%s'%s' => %s,\n", $pad, $key, $value);
-
-		return $line;
-	}
 
 	/**
 	 * @param $value
