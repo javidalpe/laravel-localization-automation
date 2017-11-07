@@ -199,7 +199,7 @@ return %s;", $content);
     {
         $content = '';
         foreach ($dictionary as $key => $value) {
-	        $line = $this->valueEncode($int, $value, $key);
+	        $line = $this->valueEncode($int + 1, $value, $key);
             $content = $content . $line;
         }
         $pad = str_repeat("\t", $int);
@@ -238,7 +238,7 @@ return %s;", $content);
 	private function valueEncode($int, $value, $key)
 	{
 		if (is_array($value)) {
-			$value = $this->arrayEncode($value, $int + 1);
+			$value = $this->arrayEncode($value, $int);
 		} else {
 			$value = json_encode($value);
 		}
